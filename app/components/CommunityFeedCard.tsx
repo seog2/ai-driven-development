@@ -1,15 +1,9 @@
 import { useState } from "react";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
-import { Post } from "@/lib/types";
+import { Post, CommunityFeedCardProps } from "@/types";
 import Image from "next/image";
 import { Heart, MessageCircle } from "lucide-react";
 import { CommentModal } from "./CommentModal";
-
-interface CommunityFeedCardProps {
-  post: Post;
-  onClick: (postId: string) => void;
-  onLikeChange: (postId: string, isLiked: boolean, newLikeCount: number) => void;
-}
 
 export function CommunityFeedCard({ post, onClick, onLikeChange }: CommunityFeedCardProps) {
   const [isCommentModalOpen, setIsCommentModalOpen] = useState(false);

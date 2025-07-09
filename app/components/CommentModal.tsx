@@ -7,15 +7,8 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Comment } from "@/lib/types";
+import { Comment, CommentModalProps } from "@/types";
 import { mockComments } from "@/lib/mockData";
-
-interface CommentModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  postId: string;
-  postUserName: string;
-}
 
 export function CommentModal({ isOpen, onClose, postId, postUserName }: CommentModalProps) {
   const [newComment, setNewComment] = useState("");
