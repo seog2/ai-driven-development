@@ -1,4 +1,43 @@
-import { Post, Comment } from './types';
+import { Post, Comment } from '../types';
+import { IStyleOptions } from '../types';
+
+// 이미지 생성 관련 목업 데이터
+export const mockStyleOptions: IStyleOptions = {
+  colorTone: 'neutral',
+  textureStrength: 50,
+  mood: 'bright',
+  stylePreset: 'realistic'
+};
+
+export const mockGeneratedImages = [
+  'https://picsum.photos/800/600?random=101',
+  'https://picsum.photos/800/600?random=102',
+  'https://picsum.photos/800/600?random=103',
+  'https://picsum.photos/800/600?random=104',
+  'https://picsum.photos/800/600?random=105'
+];
+
+// 이미지 생성 시뮬레이션 함수
+export const simulateImageGeneration = async (prompt: string, styleOptions: IStyleOptions): Promise<string> => {
+  // 실제 API 호출을 시뮬레이션하기 위한 딜레이
+  await new Promise(resolve => setTimeout(resolve, 3000));
+  
+  // 랜덤 이미지 URL 반환
+  const randomIndex = Math.floor(Math.random() * mockGeneratedImages.length);
+  return mockGeneratedImages[randomIndex];
+};
+
+// 갤러리 저장 시뮬레이션 함수
+export const simulateGallerySave = async (imageUrl: string, prompt: string, styleOptions: IStyleOptions): Promise<boolean> => {
+  await new Promise(resolve => setTimeout(resolve, 1000));
+  return true; // 항상 성공으로 시뮬레이션
+};
+
+// 커뮤니티 공유 시뮬레이션 함수
+export const simulateCommunityShare = async (shareData: any): Promise<string> => {
+  await new Promise(resolve => setTimeout(resolve, 1500));
+  return `post-${Date.now()}`; // 새로운 게시물 ID 반환
+};
 
 export const mockPosts: Post[] = [
   {

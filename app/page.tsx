@@ -3,10 +3,10 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { CommunityFeedCard } from "./components/CommunityFeedCard";
+import { CommunityFeedCard } from "@/components/CommunityFeedCard";
 import { mockPosts } from "@/lib/mockData";
 import { useRouter } from "next/navigation";
-import { Post } from "@/lib/types";
+import { Post } from "@/types";
 
 export default function Home() {
   const [prompt, setPrompt] = useState("");
