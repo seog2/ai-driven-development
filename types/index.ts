@@ -21,8 +21,6 @@ export interface Comment {
 // 이미지 생성 관련 타입
 export interface IStyleOptions {
   colorTone: 'warm' | 'cool' | 'monochrome' | 'neutral';
-  textureStrength: number; // 0-100
-  mood: 'bright' | 'dark' | 'neutral';
   stylePreset: 'realistic' | 'abstract' | 'cartoon';
 }
 
@@ -62,4 +60,37 @@ export interface IShareModalProps {
   prompt: string;
   styleOptions: IStyleOptions;
   onShare: (shareData: ISharePostData) => void;
+}
+
+// 이미지 생성 페이지 관련 타입
+export interface IGeneratePageState {
+  prompt: string;
+  styleOptions: IStyleOptions;
+  isGenerating: boolean;
+  generatedImage: string | null;
+  isShareModalOpen: boolean;
+  isSaving: boolean;
+  isDownloading: boolean;
+  promptError: string;
+}
+
+export interface IPresetConfig {
+  colorTone: IStyleOptions['colorTone'];
+}
+
+export interface IPresetConfigs {
+  realistic: IPresetConfig;
+  abstract: IPresetConfig;
+  cartoon: IPresetConfig;
+}
+
+// 유틸리티 함수 타입
+export interface IDownloadOptions {
+  filename?: string;
+  quality?: number;
+}
+
+export interface IValidationResult {
+  isValid: boolean;
+  error?: string;
 } 

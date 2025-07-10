@@ -36,8 +36,7 @@ export default function ShareModal({ isOpen, onClose, imageUrl, prompt, styleOpt
 
   const handleShare = async () => {
     if (!shareData.title.trim()) {
-      alert('제목을 입력해주세요.')
-      return
+      return // 부모 컴포넌트에서 검증 처리
     }
 
     setIsLoading(true)
@@ -54,7 +53,7 @@ export default function ShareModal({ isOpen, onClose, imageUrl, prompt, styleOpt
       setTagInput('')
     } catch (error) {
       console.error('공유 실패:', error)
-      alert('공유에 실패했습니다. 다시 시도해주세요.')
+      // 에러는 부모 컴포넌트에서 처리
     } finally {
       setIsLoading(false)
     }

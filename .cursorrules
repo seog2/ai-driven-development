@@ -42,6 +42,7 @@
       author: string
   }
 ```
+- 인터페이스 생성은 types/index.ts 파일에 작성하세요.
 
 ---
 

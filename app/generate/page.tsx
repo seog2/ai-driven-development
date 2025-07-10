@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { ArrowLeft, Download, Share2, RefreshCw, Save, Loader2 } from 'lucide-react'
 import Image from 'next/image'
-import { IStyleOptions, ISharePostData } from '@/types'
+import { IStyleOptions, ISharePostData, IPresetConfigs, IValidationResult } from '@/types'
 import { 
   mockStyleOptions, 
   simulateImageGeneration, 
@@ -18,6 +18,7 @@ import {
 import ShareModal from '@/components/ShareModal'
 import { ToastContainer } from '@/components/ui/toast-container'
 import { useToast } from '@/lib/hooks/useToast'
+import { downloadImage, generateSafeFilename, getImageExtension } from '@/lib/utils/download'
 
 export default function GeneratePage() {
   const router = useRouter()
@@ -32,20 +33,23 @@ export default function GeneratePage() {
   const [generatedImage, setGeneratedImage] = useState<string | null>(null)
   const [isShareModalOpen, setIsShareModalOpen] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
+  const [isDownloading, setIsDownloading] = useState(false)
   const [promptError, setPromptError] = useState('')
 
   // 프롬프트 유효성 검사
-  const validatePrompt = (value: string) => {
+  const validatePrompt = (value: string): IValidationResult => {
     if (!value.trim()) {
-      setPromptError('프롬프트를 입력해 주세요')
-      return false
+      const error = '프롬프트를 입력해 주세요'
+      setPromptError(error)
+      return { isValid: false, error }
     }
     if (value.length > 500) {
-      setPromptError('프롬프트는 500자 이내로 입력해 주세요')
-      return false
+      const error = '프롬프트는 500자 이내로 입력해 주세요'
+      setPromptError(error)
+      return { isValid: false, error }
     }
     setPromptError('')
-    return true
+    return { isValid: true }
   }
 
   // 스타일 옵션 업데이트 함수
@@ -58,10 +62,10 @@ export default function GeneratePage() {
 
   // 프리셋 선택 시 관련 옵션 자동 조정
   const handlePresetChange = (preset: IStyleOptions['stylePreset']) => {
-    const presetConfigs = {
-      realistic: { colorTone: 'neutral' as const },
-      abstract: { colorTone: 'cool' as const },
-      cartoon: { colorTone: 'warm' as const }
+    const presetConfigs: IPresetConfigs = {
+      realistic: { colorTone: 'neutral' },
+      abstract: { colorTone: 'cool' },
+      cartoon: { colorTone: 'warm' }
     }
     
     const config = presetConfigs[preset]
@@ -74,7 +78,8 @@ export default function GeneratePage() {
 
   // 이미지 생성 함수
   const handleGenerateImage = async () => {
-    if (!validatePrompt(prompt)) return
+    const validation = validatePrompt(prompt)
+    if (!validation.isValid) return
 
     setIsGenerating(true)
     try {
@@ -136,12 +141,28 @@ export default function GeneratePage() {
   }
 
   // 다운로드 함수
-  const handleDownload = () => {
-    if (generatedImage) {
-      const link = document.createElement('a')
-      link.href = generatedImage
-      link.download = `artify-generated-${Date.now()}.jpg`
-      link.click()
+  const handleDownload = async () => {
+    if (!generatedImage) return
+
+    setIsDownloading(true)
+    try {
+      // 프롬프트 기반으로 안전한 파일명 생성
+      const extension = getImageExtension(generatedImage)
+      const filename = generateSafeFilename(prompt, extension)
+      
+      // 다운로드 실행
+      const success = await downloadImage(generatedImage, filename)
+      
+      if (success) {
+        toast.success('다운로드 완료', '이미지가 성공적으로 다운로드되었습니다!')
+      } else {
+        throw new Error('다운로드 실패')
+      }
+    } catch (error) {
+      console.error('다운로드 실패:', error)
+      toast.error('다운로드 실패', '이미지 다운로드에 실패했습니다.')
+    } finally {
+      setIsDownloading(false)
     }
   }
 
@@ -317,11 +338,16 @@ export default function GeneratePage() {
                       
                       <Button
                         onClick={handleDownload}
+                        disabled={isDownloading}
                         variant="outline"
                         className="flex items-center gap-2"
                       >
-                        <Download size={16} />
-                        다운로드
+                        {isDownloading ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          <Download size={16} />
+                        )}
+                        {isDownloading ? '다운로드 중...' : '다운로드'}
                       </Button>
                       
                       <Button

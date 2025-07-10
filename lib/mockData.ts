@@ -4,8 +4,6 @@ import { IStyleOptions } from '../types';
 // 이미지 생성 관련 목업 데이터
 export const mockStyleOptions: IStyleOptions = {
   colorTone: 'neutral',
-  textureStrength: 50,
-  mood: 'bright',
   stylePreset: 'realistic'
 };
 
@@ -30,6 +28,7 @@ export const simulateImageGeneration = async (prompt: string, styleOptions: ISty
 // 갤러리 저장 시뮬레이션 함수
 export const simulateGallerySave = async (imageUrl: string, prompt: string, styleOptions: IStyleOptions): Promise<boolean> => {
   await new Promise(resolve => setTimeout(resolve, 1000));
+  console.log('갤러리 저장:', { imageUrl, prompt, styleOptions });
   return true; // 항상 성공으로 시뮬레이션
 };
 
