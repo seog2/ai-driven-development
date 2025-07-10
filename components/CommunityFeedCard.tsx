@@ -3,7 +3,7 @@ import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Post, CommunityFeedCardProps } from "@/types";
 import Image from "next/image";
 import { Heart, MessageCircle } from "lucide-react";
-import { CommentModal } from "./CommentModal";
+import { CommentModal } from "@/components/CommentModal";
 
 export function CommunityFeedCard({ post, onClick, onLikeChange }: CommunityFeedCardProps) {
   const [isCommentModalOpen, setIsCommentModalOpen] = useState(false);
