@@ -16,11 +16,14 @@ import {
   simulateCommunityShare 
 } from '@/lib/mockData'
 import ShareModal from '@/components/ShareModal'
+import { ToastContainer } from '@/components/ui/toast-container'
+import { useToast } from '@/lib/hooks/useToast'
 
 export default function GeneratePage() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const initialPrompt = searchParams.get('prompt') || ''
+  const { toasts, toast, removeToast } = useToast()
   
   // 상태 관리
   const [prompt, setPrompt] = useState(initialPrompt)
@@ -79,7 +82,7 @@ export default function GeneratePage() {
       setGeneratedImage(imageUrl)
     } catch (error) {
       console.error('이미지 생성 실패:', error)
-      alert('이미지 생성에 실패했습니다. 다시 시도해주세요.')
+      toast.error('이미지 생성 실패', '다시 시도해주세요.')
     } finally {
       setIsGenerating(false)
     }
@@ -92,10 +95,10 @@ export default function GeneratePage() {
     setIsSaving(true)
     try {
       await simulateGallerySave(generatedImage, prompt, styleOptions)
-      alert('갤러리에 저장되었습니다!')
+      toast.success('갤러리 저장 완료', '이미지가 갤러리에 저장되었습니다!')
     } catch (error) {
       console.error('갤러리 저장 실패:', error)
-      alert('갤러리 저장에 실패했습니다. 다시 시도해주세요.')
+      toast.error('갤러리 저장 실패', '다시 시도해주세요.')
     } finally {
       setIsSaving(false)
     }
@@ -106,16 +109,28 @@ export default function GeneratePage() {
     if (!generatedImage) return
 
     try {
+      // 제목 검증
+      if (!shareData.title.trim()) {
+        toast.warning('제목 필수', '제목을 입력해주세요.')
+        return
+      }
+
       const postId = await simulateCommunityShare({
         ...shareData,
         imageUrl: generatedImage,
         prompt,
         styleOptions
       })
-      alert('커뮤니티에 공유되었습니다!')
+      toast.success('커뮤니티 공유 완료', '이미지가 커뮤니티에 공유되었습니다!')
       console.log('새 게시물 ID:', postId)
     } catch (error) {
       console.error('공유 실패:', error)
+      const errorMessage = error instanceof Error ? error.message : '다시 시도해주세요.'
+      if (errorMessage === '제목을 입력해주세요.') {
+        toast.warning('제목 필수', '제목을 입력해주세요.')
+      } else {
+        toast.error('공유 실패', errorMessage)
+      }
       throw error
     }
   }
@@ -341,6 +356,9 @@ export default function GeneratePage() {
           onShare={handleShare}
         />
       )}
+
+      {/* 토스트 컨테이너 */}
+      <ToastContainer toasts={toasts} onRemove={removeToast} />
     </div>
   )
 } 
