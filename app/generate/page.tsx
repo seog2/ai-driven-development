@@ -1,13 +1,7 @@
 "use client"
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { ArrowLeft, Download, Share2, RefreshCw, Save, Loader2 } from 'lucide-react'
-import Image from 'next/image'
 import { IStyleOptions, ISharePostData, IPresetConfigs, IValidationResult } from '@/types'
 import { 
   mockStyleOptions, 
@@ -19,6 +13,13 @@ import ShareModal from '@/components/ShareModal'
 import { ToastContainer } from '@/components/ui/toast-container'
 import { useToast } from '@/lib/hooks/useToast'
 import { downloadImage, generateSafeFilename, getImageExtension } from '@/lib/utils/download'
+
+// Generate 관련 컴포넌트들
+import GenerateHeader from '@/components/generate/GenerateHeader'
+import PromptInput from '@/components/generate/PromptInput'
+import StyleOptions from '@/components/generate/StyleOptions'
+import GenerateButton from '@/components/generate/GenerateButton'
+import ImageResult from '@/components/generate/ImageResult'
 
 export default function GeneratePage() {
   const router = useRouter()
@@ -169,22 +170,7 @@ export default function GeneratePage() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* 헤더 */}
-      <header className="bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center gap-4">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => router.back()}
-              className="flex items-center gap-2"
-            >
-              <ArrowLeft size={16} />
-              뒤로가기
-            </Button>
-            <h1 className="text-2xl font-bold text-gray-900">Artify</h1>
-          </div>
-        </div>
-      </header>
+      <GenerateHeader onBack={() => router.back()} />
 
       {/* 메인 콘텐츠 */}
       <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -192,181 +178,40 @@ export default function GeneratePage() {
           {/* 왼쪽: 설정 패널 */}
           <div className="space-y-6">
             {/* 프롬프트 입력 섹션 */}
-            <Card>
-              <CardHeader>
-                <CardTitle>프롬프트 입력</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div>
-                  <Input
-                    value={prompt}
-                    onChange={(e) => {
-                      setPrompt(e.target.value)
-                      validatePrompt(e.target.value)
-                    }}
-                    placeholder="생성하고 싶은 이미지를 설명해주세요..."
-                    className={promptError ? 'border-red-500' : ''}
-                  />
-                  {promptError && (
-                    <p className="text-sm text-red-500 mt-1">{promptError}</p>
-                  )}
-                  <p className="text-xs text-gray-500 mt-1">
-                    프롬프트 작성 팁: 구체적이고 명확한 설명을 사용하세요. (예: "석양을 배경으로 한 고양이")
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
+            <PromptInput
+              prompt={prompt}
+              promptError={promptError}
+              onPromptChange={setPrompt}
+              onValidate={validatePrompt}
+            />
 
             {/* 스타일 옵션 선택 섹션 */}
-            <Card>
-              <CardHeader>
-                <CardTitle>스타일 옵션</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                {/* 스타일 프리셋 */}
-                <div>
-                  <label className="text-sm font-medium mb-2 block">스타일 프리셋</label>
-                  <div className="grid grid-cols-3 gap-2">
-                    {(['realistic', 'abstract', 'cartoon'] as const).map((preset) => (
-                      <Button
-                        key={preset}
-                        variant={styleOptions.stylePreset === preset ? 'default' : 'outline'}
-                        size="sm"
-                        onClick={() => handlePresetChange(preset)}
-                        className="text-xs"
-                      >
-                        {preset === 'realistic' && '사실적'}
-                        {preset === 'abstract' && '추상적'}
-                        {preset === 'cartoon' && '만화적'}
-                      </Button>
-                    ))}
-                  </div>
-                </div>
-
-                                 {/* 색감 선택 */}
-                 <div>
-                   <label className="text-sm font-medium mb-2 block">색감</label>
-                   <div className="grid grid-cols-2 gap-2">
-                     {(['warm', 'cool', 'monochrome', 'neutral'] as const).map((tone) => (
-                       <Button
-                         key={tone}
-                         variant={styleOptions.colorTone === tone ? 'default' : 'outline'}
-                         size="sm"
-                         onClick={() => updateStyleOption('colorTone', tone)}
-                         className="text-xs"
-                       >
-                         {tone === 'warm' && '따뜻한'}
-                         {tone === 'cool' && '차가운'}
-                         {tone === 'monochrome' && '모노톤'}
-                         {tone === 'neutral' && '중립적'}
-                       </Button>
-                     ))}
-                   </div>
-                 </div>
-
-                
-              </CardContent>
-            </Card>
+            <StyleOptions
+              styleOptions={styleOptions}
+              onStyleOptionChange={updateStyleOption}
+              onPresetChange={handlePresetChange}
+            />
 
             {/* 이미지 생성 버튼 */}
-            <Button
+            <GenerateButton
+              isGenerating={isGenerating}
+              isDisabled={!prompt.trim()}
               onClick={handleGenerateImage}
-              disabled={isGenerating || !prompt.trim()}
-              className="w-full h-12 text-lg"
-            >
-              {isGenerating ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  이미지 생성 중... (약 10-30초)
-                </>
-              ) : (
-                '이미지 생성하기'
-              )}
-            </Button>
+            />
           </div>
 
           {/* 오른쪽: 결과 이미지 */}
           <div className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>생성된 이미지</CardTitle>
-              </CardHeader>
-              <CardContent>
-                {isGenerating ? (
-                  <div className="flex flex-col items-center justify-center min-h-[400px] bg-gray-100 rounded-lg">
-                    <Loader2 className="h-12 w-12 animate-spin text-blue-600 mb-4" />
-                    <p className="text-gray-600">AI가 창의적인 이미지를 만들고 있습니다...</p>
-                  </div>
-                ) : generatedImage ? (
-                  <div className="space-y-4">
-                    {/* 이미지 표시 */}
-                    <div className="relative aspect-square w-full max-w-lg mx-auto">
-                      <Image
-                        src={generatedImage}
-                        alt="생성된 이미지"
-                        fill
-                        className="object-cover rounded-lg cursor-pointer hover:opacity-90 transition-opacity"
-                        sizes="(max-width: 768px) 100vw, 50vw"
-                        onClick={() => window.open(generatedImage, '_blank')}
-                      />
-                    </div>
-
-                    {/* 액션 버튼 그룹 */}
-                    <div className="flex flex-wrap gap-2 justify-center">
-                      <Button
-                        onClick={handleSaveToGallery}
-                        disabled={isSaving}
-                        variant="outline"
-                        className="flex items-center gap-2"
-                      >
-                        {isSaving ? (
-                          <Loader2 className="h-4 w-4 animate-spin" />
-                        ) : (
-                          <Save size={16} />
-                        )}
-                        갤러리 저장
-                      </Button>
-                      
-                      <Button
-                        onClick={() => setIsShareModalOpen(true)}
-                        variant="outline"
-                        className="flex items-center gap-2"
-                      >
-                        <Share2 size={16} />
-                        커뮤니티 공유
-                      </Button>
-                      
-                      <Button
-                        onClick={handleDownload}
-                        disabled={isDownloading}
-                        variant="outline"
-                        className="flex items-center gap-2"
-                      >
-                        {isDownloading ? (
-                          <Loader2 className="h-4 w-4 animate-spin" />
-                        ) : (
-                          <Download size={16} />
-                        )}
-                        {isDownloading ? '다운로드 중...' : '다운로드'}
-                      </Button>
-                      
-                      <Button
-                        onClick={handleGenerateImage}
-                        variant="outline"
-                        className="flex items-center gap-2"
-                      >
-                        <RefreshCw size={16} />
-                        다시 생성
-                      </Button>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="flex flex-col items-center justify-center min-h-[400px] bg-gray-100 rounded-lg">
-                    <p className="text-gray-600">프롬프트를 입력하고 이미지를 생성해보세요!</p>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+            <ImageResult
+              isGenerating={isGenerating}
+              generatedImage={generatedImage}
+              isSaving={isSaving}
+              isDownloading={isDownloading}
+              onSaveToGallery={handleSaveToGallery}
+              onShare={() => setIsShareModalOpen(true)}
+              onDownload={handleDownload}
+              onRegenerate={handleGenerateImage}
+            />
           </div>
         </div>
       </main>

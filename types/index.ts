@@ -93,4 +93,39 @@ export interface IDownloadOptions {
 export interface IValidationResult {
   isValid: boolean;
   error?: string;
+}
+
+// Generate 컴포넌트 Props 타입들
+export interface IPromptInputProps {
+  prompt: string;
+  promptError: string;
+  onPromptChange: (value: string) => void;
+  onValidate: (value: string) => IValidationResult;
+}
+
+export interface IStyleOptionsProps {
+  styleOptions: IStyleOptions;
+  onStyleOptionChange: <K extends keyof IStyleOptions>(key: K, value: IStyleOptions[K]) => void;
+  onPresetChange: (preset: IStyleOptions['stylePreset']) => void;
+}
+
+export interface IGenerateButtonProps {
+  isGenerating: boolean;
+  isDisabled: boolean;
+  onClick: () => void;
+}
+
+export interface IImageResultProps {
+  isGenerating: boolean;
+  generatedImage: string | null;
+  isSaving: boolean;
+  isDownloading: boolean;
+  onSaveToGallery: () => void;
+  onShare: () => void;
+  onDownload: () => void;
+  onRegenerate: () => void;
+}
+
+export interface IGenerateHeaderProps {
+  onBack: () => void;
 } 
